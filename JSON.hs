@@ -1,5 +1,3 @@
-module JSON where
-
 import Data.Char
 import Data.Maybe
 import Text.Read
@@ -93,12 +91,10 @@ parseValue xs@(c:cs)
 parseBase :: String -> (BaseType, String)
 parseBase xs@(c:cs)
   | c == '"'  = (baseVal, rest)
-  -- | c == '"'  = (Str strVal, rest)
   | c == '{'  = (Obj objVal, rest')
   | otherwise = error ("JSON parseBase error: " ++ xs)
   where
     (baseVal, rest) = parseLiteral cs
-    --(strVal, rest) = parseString cs
     (objVal, rest') = parse' xs
 
 parseArray :: String -> ([BaseType], String)
@@ -167,7 +163,9 @@ stringify x = error "TODO implement stringify"
 --
 -- Main
 --
-parseFile fileName = do
+main = do
+  putStrLn "Enter file name: "
+  fileName <- getLine
   putStrLn ("Loading " ++ fileName ++ " ...")
   contents <- readFile fileName
   putStrLn "... done!"
