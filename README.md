@@ -17,6 +17,8 @@ Makefile included for compilation.
 Load the source file into the interpreter using `ghci JSON.hs`.
 You can `parse` and `queryJSON` the stringified samples, `json1` ... `json7`.
 ```
+$ ghci JSON.hs
+(omitted)
 *Main> parse json3
 [("name",One (Str "John Doe"))]
 *Main> queryJSON (parse json5) "person.name"
@@ -27,6 +29,7 @@ One (Str "John Doe")
 Run the Makefile first. Load a custom JSON file into the parser using `./JSON`.
 The program will prompt for the filename and a query.
 ```
+$ ./JSON
 Enter file name:
 example.json
 Parsed content:
