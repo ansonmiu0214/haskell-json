@@ -3,6 +3,7 @@ module JSON where
 import Data.Char
 import Data.Maybe
 import Text.Read
+import System.Environment
 
 --
 -- Data type
@@ -27,42 +28,7 @@ data BaseType = Num Int |
 trim :: String -> String
 trim = dropWhile isSpace
 
-extractKey :: String -> (Key, String)
-extractKey []
-  = ("", "")
-extractKey (c:cs)
-  | c == '"'  = ("", cs)
-  | otherwise = (c:key, rest)
-  where
-    (key, rest) = extractKey cs
-
-{-
-getString :: String -> String
-getString s
-  = getStringNo s
-
-getStringYes :: String -> (String, String)
-getStringYes []
-  = ("", "")
-getStringYes (x:xs)
-  | x == '"'  = ("", rest)
-  | x == '\\' = (x' : y', ys')
-  | otherwise = (x : y, ys)
-  where
-    rest = getStringNo xs
-    (y, ys) = getStringYes xs
-    (x' : xs') = xs
-    (y', ys') = getStringYes xs'
-
-getStringNo :: String -> String
-getStringNo []
-  = []
-getStringNo (x:xs)
-  | x == '"'  = word
-  | otherwise = getStringNo xs
-  where
-    (word, rest) = getStringYes xs
--}
+booleanTable = [("true", True), ("false", False)]
 
 --
 -- Parsing functions
@@ -127,11 +93,12 @@ parseValue xs@(c:cs)
 parseBase :: String -> (BaseType, String)
 parseBase xs@(c:cs)
   | c == '"'  = (baseVal, rest)
+  -- | c == '"'  = (Str strVal, rest)
   | c == '{'  = (Obj objVal, rest')
   | otherwise = error ("JSON parseBase error: " ++ xs)
   where
     (baseVal, rest) = parseLiteral cs
-   -- (strVal, rest) = parseString cs
+    --(strVal, rest) = parseString cs
     (objVal, rest') = parse' xs
 
 parseArray :: String -> ([BaseType], String)
@@ -140,17 +107,17 @@ parseArray xs@(c:cs)
   | c == ','  = parseArray (trim cs)
   | otherwise = (item:arr, rest')
   where
-    (item, rest) = parseBase xs
+    (item, rest) = parseBase (trim xs)
     (arr, rest') = parseArray (trim rest)
 
 parseLiteral :: String -> (BaseType, String)
 parseLiteral x
-  | val == []       = (Str "", rest)
-  | val == "true"   = (Boolean True, rest)
-  | val == "false"  = (Boolean False, rest)
+  | val == []             = (Str "", rest)
+  | maybeBool /= Nothing  = (Boolean (fromJust maybeBool), rest)
   | otherwise       = (maybe (Str val) (\y -> Num y) maybeInt, rest)
   where
     (val, rest) = extractLiteral x
+    maybeBool = lookup val booleanTable
     maybeInt = parseInt val
 
 extractLiteral :: String -> (String, String)
@@ -174,8 +141,44 @@ parseString (c:cs)
 parseInt :: String -> Maybe Int
 parseInt = readMaybe
 
+queryJSON :: Object -> String -> Value
+queryJSON _ ""
+  = Nil
+queryJSON json query
+  | key == ""           = error "JSON query error: empty key"
+  | maybeVal == Nothing = error ("JSON query error: failed to find " ++ query)
+  | otherwise           = queryVal (fromJust maybeVal) rest
+  where
+    key = takeWhile (\x -> x /= '.') query
+    rest = drop 1 (dropWhile (\x -> x /= '.') query)
+    maybeVal = lookup key json
+
+queryVal :: Value -> String -> Value
+queryVal val ""
+  = val
+queryVal (One (Obj obj)) query
+  = queryJSON obj query
+queryVal _ query
+  = error ("JSON query error: failed to find " ++ query)
+
 stringify :: Object -> String
 stringify x = error "TODO implement stringify"
+
+--
+-- Main
+--
+parseFile fileName = do
+  putStrLn ("Loading " ++ fileName ++ " ...")
+  contents <- readFile fileName
+  putStrLn "... done!"
+  let parsedContent = parse contents
+  putStrLn "Parsed content: "
+  print parsedContent
+  putStrLn "Enter query: "
+  query <- getLine
+  putStrLn "Extracting query..."
+  let result = queryJSON parsedContent query
+  print result
 
 --
 -- Sample JSONs
