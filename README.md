@@ -69,5 +69,7 @@ This project allowed me to refine my understanding of recursion and improve my a
   * Calling `parseItem` on the same input returns the required `item :: (Key, Value)` and the unprocessed `rest`.
   * Calling `parseObj` on the `rest` returns the other `items :: [(Key, Value)]`, so the full list is obtained by `item:items`.
 
-## Issues
-TODO
+## Next steps
+1. Error handling on parsing.
+2. Implementing `stringify` - involves recursively handling the data types.
+3. Improving how the parsed data structure is `show`n on screen.
