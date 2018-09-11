@@ -46,13 +46,23 @@ Extracting query...
 ## Learning
 This project allowed me to refine my understanding of recursion and improve my ability to break down problems into simpler terms. All the utility functions used by `parse` are predicated on the return values of mutual recursive calls.
 
-### parseLiteral :: String -> (BaseType, String)
-
 ### parseArray :: String -> ([BaseType], String)
+* Returns the array of base values and any extraneous input.
+* Base case defined on the closing square bracket, where the list of base values is empty, so the function returns `([], rest)` where `rest` is the tail of the input string.
+* Recursive case relies on recursive calls to `parseBase` and itself:
+  * Calling `parseBase` returns the singular `baseVal` along with the `rest`.
+  * Calling `parseArray` on the `rest` returns its `baseVals` along with any `other` unhanled input.
+  * `parseArray` handles the comma between values through pattern matching, and prepends the `baseVal` to the other `baseVals` before returning the full list along with `other` unhandled input.
 
 ### parseBase :: String -> (BaseType, String)
+* Handles the input string and returns the singular parsed base value, be it an integer, boolean, string or object, and returns the base value and any extraneous input.
+* Distinguish betwen literal or object by pattern matching on the head of the string.
+* Recursive call made to `parse'` for the object case, knowing that it will return the required `(Object, String)`, where `parseBase` will wrap it up as `Obj Object` prior to returning.
 
 ### parseValue :: String -> (Value, String)
+* Handles the input string and returns the parsed `Value` and any extraneous input.
+* Pattern-matches on the head of the string to determine whether to delegate to `parseBase` or `parseArray` as required.
+* Invokes `parseBase` or `parseArray` as required, and wraps their return values in the `One ()` or `Many ()` constructor before returning to comply with the `Value` data type.
 
 ### parseKey :: String -> (Key, String)
 * Handles the input string and returns the parsed `Key` and any extraneous input.
@@ -61,6 +71,11 @@ This project allowed me to refine my understanding of recursion and improve my a
 * Recursive case depends on recursive calls to itself - prepend the head onto the key returned by the recursive call made on the tail.
 
 ### parseItem :: String -> ((Key, Value), String)
+* Parses a _single_ item from the input string and returns the item's `(Key, Value)` along with the rest of the unprocessed string.
+* Relies on the return value of the call to `parseKey` and `parseValue`:
+  * `parseKey` returns the `Key` and the `rest`.
+  * `parseItem` handles the colon through pattern matching to yield some `rest'`, and invokes `parseValue` on `rest'` to obtain `Value` and the `others`.
+  * `parseItem` then returns the required `(Key, Value)` along with the unprocessed `others`.
 
 ### parseObj :: String -> ([(Key, Value)], String)
 * Handles the input string and returns the parsed `Object` and any extraneous input.
@@ -68,6 +83,7 @@ This project allowed me to refine my understanding of recursion and improve my a
 * Recursive case depends on the recursive calls of `parseItem` and itself:
   * Calling `parseItem` on the same input returns the required `item :: (Key, Value)` and the unprocessed `rest`.
   * Calling `parseObj` on the `rest` returns the other `items :: [(Key, Value)]`, so the full list is obtained by `item:items`.
+  * The comma at the beginning of the `rest` of the string is handled by `parseObj` through pattern matching.
 
 ## Next steps
 1. Error handling on parsing.
