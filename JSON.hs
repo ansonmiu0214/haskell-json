@@ -12,13 +12,24 @@ type Key = String
 data Value = Nil |
              One BaseType |
              Many [BaseType]
-        deriving (Eq, Show)
+        deriving (Eq)
 
 data BaseType = Num Int | 
                 Boolean Bool | 
                 Str String | 
                 Obj Object
-        deriving (Eq, Show)
+        deriving (Eq)
+
+instance Show Value where
+  show Nil = "[]"
+  show (One val) = show val
+  show (Many vals) = show vals
+
+instance Show BaseType where
+  show (Num x) = show x
+  show (Boolean x) = show x
+  show (Str x) = show x
+  show (Obj x) = show x
 
 --
 -- Utility functions
