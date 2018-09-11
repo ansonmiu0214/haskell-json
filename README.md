@@ -89,3 +89,4 @@ This project allowed me to refine my understanding of recursion and improve my a
 1. Error handling on parsing.
 2. Implementing `stringify` - involves recursively handling the data types.
 3. Improving how the parsed data structure is `show`n on screen.
+4. Managing escape characters used in the values.
