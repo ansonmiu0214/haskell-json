@@ -83,7 +83,7 @@ parseValue :: String -> (Value, String)
 parseValue xs@(c:cs)
   | c == '[' && arrVal == []  = (Nil, rest')
   | c == '['                  = (Many arrVal, rest') 
-  | otherwise = (One baseVal, rest)
+  | otherwise                 = (One baseVal, rest)
   where
     (baseVal, rest) = parseBase xs
     (arrVal, rest') = parseArray cs
