@@ -121,7 +121,7 @@ parseLiteral :: String -> (BaseType, String)
 parseLiteral x
   | val == []             = (Str "", rest)
   | maybeBool /= Nothing  = (Boolean (fromJust maybeBool), rest)
-  | otherwise       = (maybe (Str val) (\y -> Num y) maybeInt, rest)
+  | otherwise             = (maybe (Str val) (\y -> Num y) maybeInt, rest)
   where
     (val, rest) = extractLiteral x
     maybeBool = lookup val booleanTable
